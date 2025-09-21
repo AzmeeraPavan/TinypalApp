@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView, ActivityIndicator, View, Linking } from "react-native";
 import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Linking, ScrollView, StyleSheet, View } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
+import { API_BASE } from "../constants";
+import { getDidYouKnow } from "../utils/api";
 
-const BASE_URL = "https://genai-images-4ea9c0ca90c8.herokuapp.com";
 
 export default function DidYouKnowScreen() {
   const [data, setData] = useState(null);
@@ -12,47 +13,36 @@ export default function DidYouKnowScreen() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/did_you_know")
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
+    getDidYouKnow()
       .then(setData)
-      .catch((err) => {
-        console.error("DidYouKnow fetch error:", err);
-        setError(true);
-      })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <ActivityIndicator style={styles.center} size="large" />;
-
-  if (error || !data) {
+  if (error || !data)
     return (
       <ThemedView style={styles.center}>
         <ThemedText>⚠️ Failed to load Did You Know</ThemedText>
       </ThemedView>
     );
-  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {data.image_url && (
-        <Image
-          source={{
-            uri: data.image_url.startsWith("http")
-              ? data.image_url
-              : `${BASE_URL}${data.image_url}`,
-          }}
-          style={styles.image}
-          contentFit="cover"
-        />
+<Image
+  source={{
+    uri: data.image_url.startsWith("http")
+      ? data.image_url
+      : `${API_BASE}${data.image_url}`, // ✅ prepend API_BASE
+  }}
+  style={styles.image}
+  contentFit="cover"
+/>
       )}
-
       <ThemedText type="title">{data.title}</ThemedText>
       <ThemedText style={styles.content}>{data.content}</ThemedText>
 
-      {/* Citation */}
       {data.citation?.url && (
         <ThemedText
           style={styles.citation}
@@ -62,7 +52,6 @@ export default function DidYouKnowScreen() {
         </ThemedText>
       )}
 
-      {/* Cause and Effect */}
       {data.cause_and_effect && (
         <View style={styles.causeEffect}>
           <ThemedText style={styles.cause}>

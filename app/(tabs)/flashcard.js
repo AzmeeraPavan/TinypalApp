@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
+import { API_BASE } from "../constants";
+import { getFlashcard } from "../utils/api";
 
-const BASE_URL = "https://genai-images-4ea9c0ca90c8.herokuapp.com";
 
 export default function FlashcardScreen() {
   const [data, setData] = useState(null);
@@ -12,45 +13,33 @@ export default function FlashcardScreen() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/flashcard")
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
+    getFlashcard()
       .then(setData)
-      .catch((err) => {
-        console.error("Flashcard fetch error:", err);
-        setError(true);
-      })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return <ActivityIndicator style={styles.center} size="large" />;
-  }
-
-  if (error || !data) {
+  if (loading) return <ActivityIndicator style={styles.center} size="large" />;
+  if (error || !data)
     return (
       <ThemedView style={styles.center}>
         <ThemedText>⚠️ Failed to load Flashcard</ThemedText>
       </ThemedView>
     );
-  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {data.image_url && (
-        <Image
-          source={{
-            uri: data.image_url.startsWith("http")
-              ? data.image_url
-              : `${BASE_URL}${data.image_url}`,
-          }}
-          style={styles.image}
-          contentFit="cover"
-        />
+<Image
+  source={{
+    uri: data.image_url.startsWith("http")
+      ? data.image_url
+      : `${API_BASE}${data.image_url}`, // ✅ prepend API_BASE
+  }}
+  style={styles.image}
+  contentFit="cover"
+/>
       )}
-
       <ThemedText type="title">{data.title}</ThemedText>
       <ThemedText style={styles.content}>{data.content}</ThemedText>
     </ScrollView>
