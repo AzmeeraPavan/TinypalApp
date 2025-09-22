@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 // Simple wrapper for consistent padding & background
 export function ThemedView({ children, style, ...props }) {
@@ -13,7 +13,7 @@ export function ThemedView({ children, style, ...props }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     padding: 16,
   },
 });
