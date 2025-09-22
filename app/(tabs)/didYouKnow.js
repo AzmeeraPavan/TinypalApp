@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter } from 'expo-router'; // Import useRouter for navigation
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,18 +9,18 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
-import { API_BASE } from "../constants";
-import { getDidYouKnow } from "../utils/api";
+import { API_BASE } from "../../constants";
+import { getDidYouKnow } from "../../utils/api";
 
 export default function DidYouKnowScreen() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   useEffect(() => {
     getDidYouKnow()
@@ -29,21 +29,35 @@ export default function DidYouKnowScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
       <ThemedView style={styles.center}>
-        <ActivityIndicator style={styles.activityIndicator} size="large" />
+        <ActivityIndicator size="large" />
       </ThemedView>
     );
-  if (error || !data)
+  }
+
+  if (error || !data) {
     return (
       <ThemedView style={styles.center}>
         <ThemedText>⚠️ Failed to load Did You Know</ThemedText>
       </ThemedView>
     );
+  }
+
+  // Use a fallback child name if needed
+  const childName = data.child_name || "<child name>";
+
+  const mainContent =
+    data.content ||
+    `Toys and screens? Obvious distractions. But so are:
+- "Open your mouth! Here comes an aeroplane woooooo!!"
+- "Look there's a bird!", as the bite goes in ${childName}'s mouth.
+- "I'm closing my eyes. Let me see who comes to take a bite: you or the cat!"`;
 
   return (
-    <View style={styles.fullScreenWeb}> {/* Use a plain View for web root */}
+    <View style={styles.fullScreenWeb}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="white" />
@@ -56,6 +70,7 @@ export default function DidYouKnowScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Image Section */}
         {data.image_url && (
           <View style={styles.imageContainer}>
             <Image
@@ -76,8 +91,10 @@ export default function DidYouKnowScreen() {
           </View>
         )}
 
+        {/* Card Section */}
         <View style={styles.cardSection}>
           <View style={styles.cardContentWrapper}>
+            {/* Cause & Effect */}
             {data.cause_and_effect && (
               <View style={styles.causeEffectRow}>
                 <View style={styles.causeEffectBox}>
@@ -86,27 +103,34 @@ export default function DidYouKnowScreen() {
                   </ThemedText>
                 </View>
                 <View style={styles.circleDivider}>
-                  <ThemedText style={styles.circleDividerText}>&#8594;</ThemedText>
+                  <ThemedText style={styles.circleDividerText}>→</ThemedText>
                 </View>
                 <View style={styles.causeEffectBox}>
                   <ThemedText style={styles.causeEffectLabel}>
-                    {data.cause_and_effect.effect_label || "Higher rates of healthy food refusal"}
+                    {data.cause_and_effect.effect_label ||
+                      "Higher rates of healthy food refusal"}
                   </ThemedText>
                 </View>
               </View>
             )}
 
-            <ThemedText style={styles.mainContentText}>
-              {data.content ||
-                "One study found that kids were twice as likely to become picky eaters when they ate with distractions"}
-            </ThemedText>
+            {/* Main Content */}
+            <View style={styles.mainContentWrapper}>
+              {mainContent.split("\n").map((line, idx) => (
+                <ThemedText key={idx} style={styles.mainContentText}>
+                  {line}
+                </ThemedText>
+              ))}
+            </View>
 
+            {/* Citation */}
             {data.citation?.url && (
               <ThemedText
                 style={styles.citationText}
                 onPress={() => Linking.openURL(data.citation.url)}
               >
-                {data.citation.label || "Journal of Applied Developmental Development Psychology"}
+                {data.citation.label ||
+                  "Journal of Applied Developmental Development Psychology"}
               </ThemedText>
             )}
           </View>
@@ -120,10 +144,9 @@ const styles = StyleSheet.create({
   fullScreenWeb: {
     flex: 1,
     backgroundColor: "#fff",
-    // Ensure full width on web, and potentially limit max-width for content
-    maxWidth: Platform.OS === 'web' ? 500 : '100%', // Limit width for web view
-    alignSelf: Platform.OS === 'web' ? 'center' : 'auto', // Center on web
-    height: Platform.OS === 'web' ? '100vh' : '100%', // Take full viewport height on web
+    maxWidth: Platform.OS === "web" ? 500 : "100%",
+    alignSelf: Platform.OS === "web" ? "center" : "auto",
+    height: Platform.OS === "web" ? "100vh" : "100%",
   },
   header: {
     flexDirection: "row",
@@ -131,8 +154,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#1A2E44",
     paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 50 : 12, // Apply padding top for iOS safe area only
-    height: Platform.OS === 'web' ? 70 : 'auto', // Fixed height for web header
+    paddingVertical: Platform.OS === "ios" ? 50 : 12,
+    height: Platform.OS === "web" ? 70 : "auto",
   },
   headerTextContainer: {
     flex: 1,
@@ -185,12 +208,12 @@ const styles = StyleSheet.create({
   },
   lightbulbIcon: {
     marginRight: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 18,
     width: 36,
     height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   didYouKnowText: {
     fontSize: 18,
@@ -249,12 +272,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     transform: [{ rotateY: "180deg" }],
   },
+  mainContentWrapper: {
+    marginBottom: 15,
+    alignItems: "center",
+  },
   mainContentText: {
     fontSize: 16,
     lineHeight: 24,
     textAlign: "center",
-    marginBottom: 15,
     color: "#424242",
+    marginBottom: 4,
   },
   citationText: {
     fontSize: 14,
@@ -267,8 +294,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-  },
-  activityIndicator: {
-    marginTop: -80,
   },
 });

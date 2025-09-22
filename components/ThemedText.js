@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 // type="title" makes text bigger and bold
 export function ThemedText({ children, style, type = "normal", ...props }) {

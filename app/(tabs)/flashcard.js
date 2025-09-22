@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter } from 'expo-router'; // Import useRouter for navigation
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,14 +12,14 @@ import {
 } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
-import { API_BASE } from "../constants";
-import { getFlashcard } from "../utils/api";
+import { API_BASE } from "../../constants";
+import { getFlashcard } from "../../utils/api";
 
 export default function FlashcardScreen() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   useEffect(() => {
     getFlashcard()
@@ -28,21 +28,24 @@ export default function FlashcardScreen() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
       <ThemedView style={styles.center}>
-        <ActivityIndicator style={styles.activityIndicator} size="large" />
+        <ActivityIndicator size="large" />
       </ThemedView>
     );
-  if (error || !data)
+  }
+
+  if (error || !data) {
     return (
       <ThemedView style={styles.center}>
         <ThemedText>⚠️ Failed to load Flashcard</ThemedText>
       </ThemedView>
     );
+  }
 
   return (
-    <View style={styles.fullScreenWeb}> {/* Use a plain View for web root */}
+    <View style={styles.fullScreenWeb}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="white" />
@@ -79,7 +82,10 @@ export default function FlashcardScreen() {
             </ThemedText>
             <ThemedText style={styles.cardContent}>
               {data.content ||
-                "Toys and screens? Obvious distractions. But so are:\n- \"Open your mouth! Here comes an aeroplane woooooo!!\"\n- \"Look there's a bird!\", as the bite goes in <child name>'s mouth.\n- \"I'm closing my eyes. Let me see who comes to take a bite: you or the cat!\""}
+                `Toys and screens? Obvious distractions. But so are:
+- "Open your mouth! Here comes an aeroplane woooooo!!"
+- "Look there's a bird!", as the bite goes in <child name>'s mouth.
+- "I'm closing my eyes. Let me see who comes to take a bite: you or the cat!"`}
             </ThemedText>
           </View>
         </View>
@@ -92,9 +98,9 @@ const styles = StyleSheet.create({
   fullScreenWeb: {
     flex: 1,
     backgroundColor: "#fff",
-    maxWidth: Platform.OS === 'web' ? 500 : '100%',
-    alignSelf: Platform.OS === 'web' ? 'center' : 'auto',
-    height: Platform.OS === 'web' ? '100vh' : '100%',
+    maxWidth: Platform.OS === "web" ? 500 : "100%",
+    alignSelf: Platform.OS === "web" ? "center" : "auto",
+    height: Platform.OS === "web" ? "100vh" : "100%",
   },
   header: {
     flexDirection: "row",
@@ -102,8 +108,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#1A2E44",
     paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 50 : 12, // Apply padding top for iOS safe area only
-    height: Platform.OS === 'web' ? 70 : 'auto',
+    paddingVertical: Platform.OS === "ios" ? 50 : 12,
+    height: Platform.OS === "web" ? 70 : "auto",
   },
   headerTextContainer: {
     flex: 1,
@@ -118,24 +124,10 @@ const styles = StyleSheet.create({
     color: "#A0AEC0",
     fontSize: 12,
   },
-  placeholderIcon: {
-    width: 24,
-    height: 24,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-  imageContainer: {
-    width: "100%",
-    height: 300,
-    position: "relative",
-    marginBottom: -80,
-  },
-  mainImage: {
-    width: "100%",
-    height: "100%",
-  },
+  placeholderIcon: { width: 24, height: 24 },
+  scrollContainer: { flexGrow: 1, paddingBottom: 20 },
+  imageContainer: { width: "100%", height: 300, position: "relative", marginBottom: -80 },
+  mainImage: { width: "100%", height: "100%" },
   numberCircle: {
     position: "absolute",
     bottom: -30,
@@ -146,17 +138,9 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    elevation: 3, // Android shadow
   },
-  numberText: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "white",
-  },
+  numberText: { fontSize: 30, fontWeight: "bold", color: "white" },
   cardSection: {
     backgroundColor: "#E0F7FA",
     borderTopLeftRadius: 30,
@@ -170,26 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#00796B",
-    marginBottom: 10,
-    textAlign: "left",
-  },
-  cardContent: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#424242",
-    textAlign: "left",
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  activityIndicator: {
-    marginTop: -80,
-  },
+  cardTitle: { fontSize: 20, fontWeight: "bold", color: "#00796B", marginBottom: 10 },
+  cardContent: { fontSize: 16, lineHeight: 24, color: "#424242" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
 });
