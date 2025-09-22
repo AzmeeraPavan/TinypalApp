@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Platform,
   ScrollView,
   StyleSheet,
@@ -20,6 +21,7 @@ export default function FlashcardScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const router = useRouter();
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     getFlashcard()
@@ -27,6 +29,17 @@ export default function FlashcardScreen() {
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  // Animate progress bar over 30 seconds
+  useEffect(() => {
+    if (!loading && data) {
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 30000, // 30 seconds
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [loading, data]);
 
   if (loading) {
     return (
@@ -44,8 +57,20 @@ export default function FlashcardScreen() {
     );
   }
 
+  const mainContent = data.content || 
+    `Toys and screens? Obvious distractions. But so are:
+- "Open your mouth! Here comes an aeroplane woooooo!!"
+- "Look there's a bird!", as the bite goes in <child name>'s mouth.
+- "I'm closing my eyes. Let me see who comes to take a bite: you or the cat!"`;
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
+
   return (
     <View style={styles.fullScreenWeb}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="white" />
@@ -55,6 +80,11 @@ export default function FlashcardScreen() {
           <ThemedText style={styles.headerSubtitle}>No Distractions 101</ThemedText>
         </View>
         <View style={styles.placeholderIcon} />
+      </View>
+
+      {/* Progress Bar */}
+      <View style={styles.progressBarWrapper}>
+        <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -81,11 +111,11 @@ export default function FlashcardScreen() {
               {data.title || "What Qualifies as Distractions?"}
             </ThemedText>
             <ThemedText style={styles.cardContent}>
-              {data.content ||
-                `Toys and screens? Obvious distractions. But so are:
-- "Open your mouth! Here comes an aeroplane woooooo!!"
-- "Look there's a bird!", as the bite goes in <child name>'s mouth.
-- "I'm closing my eyes. Let me see who comes to take a bite: you or the cat!"`}
+              {mainContent.split("\n").map((line, idx) => (
+                <ThemedText key={idx} style={styles.cardContent}>
+                  {line}
+                </ThemedText>
+              ))}
             </ThemedText>
           </View>
         </View>
@@ -138,13 +168,15 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 3, // Android shadow
+    elevation: 3,
   },
   numberText: { fontSize: 30, fontWeight: "bold", color: "white" },
   cardSection: {
     backgroundColor: "#E0F7FA",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+      borderBottomLeftRadius: 30,  // add
+  borderBottomRightRadius: 30,
     flex: 1,
     paddingTop: 80,
   },
@@ -155,6 +187,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   cardTitle: { fontSize: 20, fontWeight: "bold", color: "#00796B", marginBottom: 10 },
-  cardContent: { fontSize: 16, lineHeight: 24, color: "#424242" },
+  cardContent: { fontSize: 16, lineHeight: 24, color: "#424242", marginBottom: 4 },
   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
+  // Progress Bar
+  progressBarWrapper: {
+    height: 6,
+    marginHorizontal: 20,
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: "#E0E0E0",
+    marginVertical: 8,
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#00796B",
+  },
 });

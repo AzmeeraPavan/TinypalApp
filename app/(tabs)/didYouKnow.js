@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Linking,
   Platform,
   ScrollView,
@@ -21,6 +22,7 @@ export default function DidYouKnowScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const router = useRouter();
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     getDidYouKnow()
@@ -28,6 +30,17 @@ export default function DidYouKnowScreen() {
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  // Animate progress bar over 30 seconds
+  useEffect(() => {
+    if (!loading && data) {
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 30000, // 30 seconds
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [loading, data]);
 
   if (loading) {
     return (
@@ -45,7 +58,6 @@ export default function DidYouKnowScreen() {
     );
   }
 
-  // Use a fallback child name if needed
   const childName = data.child_name || "<child name>";
 
   const mainContent =
@@ -54,6 +66,11 @@ export default function DidYouKnowScreen() {
 - "Open your mouth! Here comes an aeroplane woooooo!!"
 - "Look there's a bird!", as the bite goes in ${childName}'s mouth.
 - "I'm closing my eyes. Let me see who comes to take a bite: you or the cat!"`;
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
 
   return (
     <View style={styles.fullScreenWeb}>
@@ -67,6 +84,13 @@ export default function DidYouKnowScreen() {
           <ThemedText style={styles.headerSubtitle}>Distractions=No No!</ThemedText>
         </View>
         <View style={styles.placeholderIcon} />
+      </View>
+
+      {/* Progress Bar */}
+      <View style={styles.progressBarWrapper}>
+        <Animated.View
+          style={[styles.progressBarFill, { width: progressWidth }]}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -224,6 +248,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFEBEE",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+     borderBottomLeftRadius: 30,  // <-- add this
+  borderBottomRightRadius: 30, // <-- add this
     flex: 1,
     paddingTop: 80,
   },
@@ -294,5 +320,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+  // --- Progress Bar ---
+  progressBarWrapper: {
+    height: 6,
+    marginHorizontal: 20,
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: "#E0E0E0",
+    marginVertical: 8,
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#E53935",
   },
 });
